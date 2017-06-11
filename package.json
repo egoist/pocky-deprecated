@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "name": "pocky",
+  "scripts": {
+    "lint": "xo",
+    "test": "lerna bootstrap && lerna run test"
+  },
+  "devDependencies": {
+    "lerna": "^2.0.0-rc.5",
+    "xo": "^0.18.2"
+  },
+  "xo": {
+    "extends": "rem",
+    "envs": [
+      "jest"
+    ]
+  }
+}

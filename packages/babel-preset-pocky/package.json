@@ -1,0 +1,11 @@
+{
+  "name": "babel-preset-pocky",
+  "version": "0.0.0",
+  "files": [
+    "index.js"
+  ],
+  "dependencies": {
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-preset-env": "^1.5.2"
+  }
+}

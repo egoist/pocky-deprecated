@@ -6,7 +6,7 @@ const log = require('../lib/log')
 
 process.on('SIGINT', process.exit)
 
-module.exports = function(options) {
+module.exports = function (options) {
   const { rollupConfig } = options
   const watcher = watch(rollup, rollupConfig)
   const script = path.resolve(rollupConfig.dest)
@@ -14,6 +14,7 @@ module.exports = function(options) {
   let started
   watcher.on('event', event => {
     switch (event.code) {
+      // eslint-disable-next-line no-warning-comments
       case 'STARTING': // TODO this isn't emitted by newer versions of rollup-watch
         log.info('checking rollup-watch version')
         break

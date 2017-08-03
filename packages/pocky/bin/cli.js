@@ -1,63 +1,67 @@
 #!/usr/bin/env node
-const path = require('path')
-const yargs = require('yargs')
+const cac = require('cac')
 const loudReject = require('loud-rejection')
-const pkg = require('../package')
+const readRollupConfig = require('../lib/read-rollup-config')
+const log = require('../lib/log')
 
 loudReject()
 
-const commands = new Set(['watch', 'build'])
+function getOptions(input, flags) {
+  return new Promise(resolve => {
+    const entry = input[0] || 'index.js'
+    const dest = flags.dest || 'pocky-bundle.js'
 
-function getOptions(argv) {
-  const entry = commands.has(argv._[0]) ? argv._[1] : argv._[0]
-  const options = {
-    rollupConfig: {
-      entry: entry || 'index.js',
-      dest: argv.dest || 'pocky-bundle.js',
-      format: 'cjs',
-      plugins: [
-        require('rollup-plugin-babel')({
-          exclude: 'node_modules/**',
-          presets: [require.resolve('babel-preset-pocky')]
-        })
-      ]
+    const options = {
+      rollupConfig: {
+        entry,
+        dest,
+        format: 'cjs',
+        plugins: [
+          require('rollup-plugin-babel')({
+            exclude: 'node_modules/**',
+            presets: [require.resolve('babel-preset-pocky')]
+          })
+        ]
+      }
     }
-  }
 
-  if (argv.rollupConfig) {
-    let rollupConfig = argv.rollupConfig
-    if (typeof rollupConfig === 'string') {
-      rollupConfig = require(path.resolve(rollupConfig))
-      Object.assign(options.rollupConfig, rollupConfig)
-    } else if (typeof rollupConfig === 'object') {
-      Object.assign(options.rollupConfig, rollupConfig)
-    } else if (typeof rollupConfig === 'function') {
-      options.rollupConfig = rollupConfig(options.rollupConfig)
+    if (typeof flags.rollupConfig === 'string') {
+      resolve(readRollupConfig(flags.rollupConfig).then(config => {
+        Object.assign(options.rollupConfig, config)
+        return options
+      }))
     }
-  }
 
-  return options
+    resolve(options)
+  })
 }
 
-yargs
-  .command(
-    ['*', 'watch'],
+const cli = cac()
+
+cli.command(
+    '*',
     'Run app in watch mode',
-    yargs => {},
-    argv => {
-      const options = getOptions(argv)
-      require('./watch')(options)
+    (input, flags) => {
+      getOptions(input, flags).then(options => {
+        require('./watch')(options)
+      })
     }
   )
-  .command(
+
+cli.command(
     'build',
     'Build app',
-    yargs => {},
-    argv => {
-      const options = getOptions(argv)
-      require('./build')(options)
+    (input, flags) => {
+      getOptions(input, flags).then(options => {
+        return require('./build')(options)
+          .then(() => {
+            log.success(`Bundle has been generated to ${options.rollupConfig.dest}`)
+          })
+      })
     }
   )
+
+cli
   .option('rollup-config', {
     desc: 'Path to custom rollup config file'
   })
@@ -65,8 +69,5 @@ yargs
     desc: 'Path to dest file',
     alias: 'd'
   })
-  .example('pocky src/server.js -d dist/server-bundle.js')
-  .alias('h', 'help')
-  .alias('v', 'version')
-  .version(pkg.version)
-  .help().argv
+
+cli.parse()

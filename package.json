@@ -3,9 +3,10 @@
   "name": "pocky",
   "scripts": {
     "lint": "xo",
-    "test": "lerna bootstrap && lerna run test"
+    "test": "lerna bootstrap && xo && lerna exec -- npm test"
   },
   "devDependencies": {
+    "eslint-config-rem": "^3.2.0",
     "lerna": "^2.0.0-rc.5",
     "xo": "^0.18.2"
   },

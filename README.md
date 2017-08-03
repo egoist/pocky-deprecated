@@ -44,6 +44,12 @@ By default it uses [babel-preset-pocky](./packages/babel-preset-pocky) which tar
 pocky [path/to/entry.js]
 ```
 
+#### Custom rollup config
+
+```bash
+pocky --rollup-config ./path/to/rollup.config.js
+```
+
 ## Contributing
 
 1. Fork it!
